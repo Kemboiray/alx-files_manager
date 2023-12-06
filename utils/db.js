@@ -3,6 +3,7 @@
 // class `DBClient`.
 
 import { MongoClient } from 'mongodb';
+// import { promisify } from 'util';
 
 class DBClient {
   constructor() {
@@ -13,7 +14,7 @@ class DBClient {
 
     MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
       if (!err) {
-        this.db = client.db();
+        this.db = client.db(database);
         this.users = this.db.collection('users');
         this.files = this.db.collection('files');
       } else {
@@ -23,7 +24,7 @@ class DBClient {
   }
 
   isAlive() {
-    return this.db !== false;
+    return !!this.db;
   }
 
   async nbUsers() {
