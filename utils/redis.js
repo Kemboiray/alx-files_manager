@@ -6,13 +6,14 @@ class RedisClient {
   constructor() {
     this.client = createClient();
     this.client.on('error', (error) => console.error(`Error: ${error.message}`));
-    this.quit = this.client.quit;
+    process.on('SIGINT', () => {
+      this.client.quit();
+    });
+    this.client.connect();
   }
 
   isAlive() {
-    let connected = false;
-    this.client.on('connect', () => { connected = true; });
-    return connected;
+    return this.client.isOpen;
   }
 
   get(key) {
@@ -44,5 +45,4 @@ class RedisClient {
 }
 
 const redisClient = new RedisClient();
-process.on('SIGINT', () => redisClient.quit());
-module.exports = redisClient;
+export default redisClient;

@@ -1,0 +1,2 @@
+npm i bull chai-http express image-thumbnail mime-types mongodb redis sha1 uuid
+npm i  @babel/cli @babel/core @babel/node @babel/preset-env @babel/register chai chai-http mocha nodemon eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-jest request sinon --save-dev
