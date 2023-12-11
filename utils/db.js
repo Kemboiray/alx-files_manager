@@ -3,7 +3,7 @@
 // class `DBClient`.
 
 import { MongoClient } from 'mongodb';
-// import { promisify } from 'util';
+const process = require('process');
 
 class DBClient {
   constructor() {

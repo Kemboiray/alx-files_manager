@@ -1,31 +1,48 @@
 // File: redis.js
 // Defines the Redis client and its methods
-
 import { createClient } from 'redis';
-import { promisify } from 'util';
 
 class RedisClient {
   constructor() {
     this.client = createClient();
     this.client.on('error', (error) => console.error(`Error: ${error.message}`));
+    this.quit = this.client.quit;
   }
 
   isAlive() {
-    return this.client.connected;
+    let connected = false;
+    this.client.on('connect', () => { connected = true; });
+    return connected;
   }
 
-  async get(key) {
-    return promisify(this.client.GET).bind(this.client)(key);
+  get(key) {
+    return new Promise((resolve, reject) => {
+      this.client.GET(key, (err, value) => {
+        if (err) reject(err);
+        else resolve(value);
+      });
+    });
   }
 
-  async set(key, value, duration) {
-    return promisify(this.client.SET).bind(this.client)(key, value, 'Ex', duration);
+  set(key, value, duration) {
+    return new Promise((resolve, reject) => {
+      this.client.SETEX(key, duration, value, (err, val) => {
+        if (err) reject(err);
+        else resolve(val);
+      });
+    });
   }
 
-  async del(key) {
-    return promisify(this.client.DEL).bind(this.client)(key);
+  del(key) {
+    return new Promise((resolve, reject) => {
+      this.client.DEL(key, (err, val) => {
+        if (err) reject(err);
+        else resolve(val);
+      });
+    });
   }
 }
 
 const redisClient = new RedisClient();
-export default redisClient;
+process.on('SIGINT', () => redisClient.quit());
+module.exports = redisClient;
