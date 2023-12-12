@@ -4,43 +4,33 @@ import { createClient } from 'redis';
 
 class RedisClient {
   constructor() {
-    this.client = createClient();
-    this.client.on('error', (error) => console.error(`Error: ${error.message}`));
-    process.on('SIGINT', () => {
-      this.client.quit();
-    });
+    this.client = createClient()
+    .on('error', err => console.error('Redis Client Error', err));
     this.client.connect();
+    const client = this.client;
+    process.on('SIGINT', () => client.disconnect());
   }
 
   isAlive() {
     return this.client.isOpen;
   }
 
-  get(key) {
-    return new Promise((resolve, reject) => {
-      this.client.GET(key, (err, value) => {
-        if (err) reject(err);
-        else resolve(value);
-      });
-    });
+  async get(key) {
+    const value = await this.client.GET(key)
+      .catch(err => console.error('Error:', err.message));
+    return value;
   }
 
-  set(key, value, duration) {
-    return new Promise((resolve, reject) => {
-      this.client.SETEX(key, duration, value, (err, val) => {
-        if (err) reject(err);
-        else resolve(val);
-      });
-    });
+  async set(key, value, duration) {
+    await this.client.SET(key, value)
+    .catch(err => console.error('Error:', err.message));
+    await this.client.EXPIRE(key, duration)
+    .catch(err => console.error('Error:', err.message));
   }
 
-  del(key) {
-    return new Promise((resolve, reject) => {
-      this.client.DEL(key, (err, val) => {
-        if (err) reject(err);
-        else resolve(val);
-      });
-    });
+  async del(key) {
+    await this.client.DEL(key)
+    .catch(err => console.error('Error:', err.message));
   }
 }
 
