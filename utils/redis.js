@@ -6,13 +6,13 @@ class RedisClient {
   constructor() {
     this.client = createClient()
       .on('error', (err) => console.error('Redis Client Error', err));
-    this.client.connect();
-    const { client } = this;
+    (async () => await this.client.connect())();
+    const { client } = this.client;
     process.on('SIGINT', () => client.disconnect());
   }
 
   isAlive() {
-    return this.client.isOpen;
+    return this.client.isReady;
   }
 
   async get(key) {
