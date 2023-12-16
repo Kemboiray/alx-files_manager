@@ -1,3 +1,4 @@
+// Main file for testing
 import redisClient from './utils/redis';
 
 (async () => {
