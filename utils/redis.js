@@ -1,14 +1,21 @@
 // File: redis.js
 // Defines the Redis client and its methods
-import { createClient } from 'redis';
+const redis = require('redis');
 
 class RedisClient {
   constructor() {
-    this.client = createClient()
-      .on('error', (err) => console.error('Redis Client Error', err));
-    (async () => await this.client.connect())();
-    const { client } = this.client;
-    process.on('SIGINT', () => client.disconnect());
+    let redisClient;
+    try {
+      (async () => {
+        redisClient = await redis.createClient();
+        redisClient.on('error', err => { throw Error(err); });
+        await redisClient.connect();
+        process.on('SIGINT', () => redisClient.disconnect());
+      })();
+      this.client = redisClient;
+    } catch(err) {
+      console.error(err); 
+    }
   }
 
   isAlive() {
